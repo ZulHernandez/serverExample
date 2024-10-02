@@ -3,10 +3,17 @@ const app = express(); //* Inicializa express
 const PORT = process.env.PORT || 3000; //* Puerto de escucha
 import puppeteer from "puppeteer"; //* Importa puppeteer
 import express, { response } from "express"; //* Importa express
+require("dotenv").config(); //* Importa dotenv
+
 
 async function mensaje(obj) {
+	args: ["--no-sandbox", "--disable-setuid-sandbox", "--single-process", "--no-zygote"];
 	// Launch the browser and open a new blank page
-	const browser = await puppeteer.launch();
+	const browser = await puppeteer.launch({
+		executablePath: process.env.NODE_ENV === "production" 
+		? proccess.env.PUPPETEER_EXECUTABLE_PATH
+		: puppeteer.executablePath(),
+	});
 
 	try {
 		const page = await browser.newPage({headless: true});
