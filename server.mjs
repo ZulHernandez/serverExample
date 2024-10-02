@@ -3,7 +3,7 @@ const app = express(); //* Inicializa express
 const PORT = process.env.PORT || 3000; //* Puerto de escucha
 import puppeteer from "puppeteer"; //* Importa puppeteer
 import express, { response } from "express"; //* Importa express
-require("dotenv").config(); //* Importa dotenv
+import 'dotenv/config'; //* Importa dotenv
 
 
 async function mensaje(obj) {
