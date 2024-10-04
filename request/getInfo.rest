@@ -1,3 +1,3 @@
-GET http://localhost:3000/casa
+GET http://localhost:3000/iphone
 
 //GET http://172.22.232.252:3000/iphone

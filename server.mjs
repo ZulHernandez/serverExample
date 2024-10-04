@@ -72,29 +72,95 @@ const crawler = async (obj) => {
 	const browser = await puppeteer.launch({ headless: "new" }); //* headless: "new" para que se abra el navegador
 	console.log("> Browser Opened"); //* Mensaje de apertura del navegador
 
+	await delay();
 	const page = await browser.newPage(); //* Abre una nueva pestaña
 	console.log("> Page Opened"); //* Mensaje de apertura de la pestaña
 
 	try {
-		await page.goto("https://www.liverpool.com.mx/tienda?s=" + obj); //* Ir a la página de Liverpool con el objeto a buscar
-		console.log("> Page Loaded for " + obj); //* Mensaje de carga de la página
+		//await delay();
+		//await page.goto("https://www.liverpool.com.mx/");
+		await delay();
+		//await page.goto("https://www.liverpool.com.mx/tienda?s=" + obj); //* Ir a la página de Liverpool con el objeto a buscar
+		//console.log("> Page Loaded for " + obj); //* Mensaje de carga de la página
+		await page.goto("https://www.liverpool.com.mx/tienda/home");
+		console.log("> Page Loaded");
+
+		//await delay();
+		await page.waitForSelector('.form-control.search-bar.plp-no__results');
+		console.log("> Input Loaded");
+
+		await delay();
+		await page.click('.form-control.search-bar.plp-no__results');
+		console.log("> Input Clicked");
+		
+		await delay();
+		await page.type('.form-control.search-bar.plp-no__results', obj + "");
+		console.log("> Input Typed");
+
+		await delay();
+		await page.keyboard.press('Enter');
+		console.log("> Enter Pressed");
 	} catch (error) {
 		//await page. screenshot({ path: 'pythonorg.png', fullPage: true });
-		gallery = [404]; //* Mensaje de error
+		gallery = ["Error en la carga de las páginas"]; //* Mensaje de error
 		return gallery; //* Retorna el array
 	}
 
 	//main Data
-	const elements = await page.$$(".m-product__card.card-masonry.a"); //* Busca todas las cards de producto y las guarda en un array
-	console.log("\nregistros: " + elements.length); //* Muestra la cantidad de registros encontrados
+	await delay();
+	//* Busca todas las cards de producto y las guarda en un array
+	//const elements = await page.$$(".m-product__card.card-masonry.a");
+
+	/* let count;
+	try {
+		count = await page.$$eval(".m-product__card.card-masonry.a", elements => elements.length);
+	} catch (error) {
+		console.log("Error en el conteo de elementos");
+		return error;
+	} */
+
+	//console.log("\nregistros: " + count); //* Muestra la cantidad de registros encontrados
+	//console.log("\nregistros: " + elements.length); //* Muestra la cantidad de registros encontrados
+	
+	let elements = [];
+	console.log("Se contaron " + 56 + " en total");
+	
+	try {
+		for(let i = 1; i <= 56; i++){
+			await delay();
+			try {
+				let element = await page.$(".m-product__card.card-masonry.a:nth-of-type(" + i + ")");
+				console.log("elemento " + i + ": ");
+				console.log(element);
+				elements.push(element);
+			} catch (error) {
+				console.log("no se pudo extraer el elemento");
+				return error;
+			}
+		}
+	} catch (error) {
+		console.log("Error en la extracción de elementos");
+		return error;
+	}
+	
+
+	//let element2 = await page.$('.m-product__card.card-masonry.a:nth-of-type(1)');
+	//let element4 = await page.$('.m-product__card.card-masonry.a:nth-of-type(4)');
+
+	//console.log(elements);
+	//console.log(element2);
+
 
 	//* Si no hay registros
 	if (elements.length == 0) {
+		console.log("No conto nada");
+		
 		gallery = [404]; //* Mensaje de error
 	} else {
 		gallery = []; //* Limpiamos el array
 		//* Recorre el array de cards
 		for (let i = 0; i < elements.length; i++) {
+			//await delay();
 			let n = elements[i]; //* Selecciona la card actual
 
 			//main Imagen
@@ -204,6 +270,7 @@ const crawler = async (obj) => {
 				stars,
 				opinions
 			);
+			console.log("Objeto creado: " + i);
 		}
 	}
 
@@ -220,6 +287,10 @@ const mensaje = async (obj) => {
 	return mensaje;
 };
 
+function delay() {
+	return new Promise((resolve) => setTimeout(resolve, 2000));
+}
+
 //main Server
 //* Configuración de CORS
 app.use((req, res, next) => {
@@ -231,15 +302,26 @@ app.use((req, res, next) => {
 app.get("/:obj", async (req, res) => {
 	const obj = req.params.obj; //* Obtiene el objeto a buscar
 	let response = null; //* Respuesta del crawler
+
 	response = await crawler(obj); //* Ejecuta el crawler
 
-	//response = await mensaje(obj); //* Ejecuta el crawler
+	//await delay();
+	//response = await mensaje(obj); //* Ejecuta el mensaje
 
 	console.log(response[0]); //* Muestra la respuesta
 	//* Si no se encuentra lo buscado
 	response == "No se encontro lo buscado"
 		? res.send(response) //* Envia la respuesta en formato texto en caso de que no se encuentre lo buscado
 		: res.json(response); //* Envia la respuesta en formato json en caso de que se encuentre lo buscado
+
+	/* response = await mensaje(obj); //* Ejecuta el mensaje
+
+	console.log(response[0]); //* Muestra la respuesta
+	//* Si no se encuentra lo buscado
+	response == "No se encontro lo buscado"
+		? res.send(response) //* Envia la respuesta en formato texto en caso de que no se encuentre lo buscado
+		: res.json(response); //* Envia la respuesta en formato json en caso de que se encuentre lo buscado
+ */
 });
 
 //* Inicia el servidor
